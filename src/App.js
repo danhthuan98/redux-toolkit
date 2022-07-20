@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { unwrapResult } from '@reduxjs/toolkit';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
-import CounterPage from './components/counter';
 import Layout from './components/layout';
 import PostPage from './components/post';
-import { unwrapResult } from '@reduxjs/toolkit';
+import NewPost from './components/post/NewPost';
 import { fetchPosts } from './features/post/postSlice';
 
 
@@ -28,7 +28,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route path="/count" element={<CounterPage />} />
+        <Route path="/post/newpost" element={<NewPost />} />
+        <Route path="/post/:id" element={<NewPost />} />
         <Route path="/" element={<PostPage />} />
       </Route>
     </Routes>

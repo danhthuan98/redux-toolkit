@@ -5,7 +5,8 @@ import axios from '../../api/axios';
 const initialState = {
     posts: [],
     isLoading: false,
-    fetchError: null
+    fetchError: null,
+    error: null
 };
 
 export const fetchPosts = createAsyncThunk(
@@ -14,6 +15,23 @@ export const fetchPosts = createAsyncThunk(
         const response = await axios.get('getPost')
         // The value we return becomes the `fulfilled` action payload
         return response.data;
+    }
+);
+
+export const createPost = createAsyncThunk(
+    'posts/createPost',
+    async (post, { rejectWithValue }) => {
+        try {
+            const response = await axios.post('postMessage', post)
+            // The value we return becomes the `fulfilled` action payload
+            return response.data;
+        } catch (err) {
+            if (!err.response) {
+                throw err
+            }
+            return rejectWithValue(err.response.data)
+        }
+
     }
 );
 
@@ -30,14 +48,25 @@ export const postSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(fetchPosts.fulfilled, (state, action) => {
-                console.log(action.payload.posts)
                 state.isLoading = false;
                 state.posts = action.payload.posts;
             })
             .addCase(fetchPosts.rejected, (state, action) => {
                 state.isLoading = false;
                 state.fetchError = action.error;
-            });
+            })
+            .addCase(createPost.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(createPost.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.posts.push(action.payload.post);
+            })
+            .addCase(createPost.rejected, (state, action) => {
+                    console.log(action.error)
+                    state.isLoading = false;
+                    state.error = action.error;
+            })
     }
 });
 

@@ -17,7 +17,7 @@ const Nav = () => {
             </form>
             <ul>
                 <li><Link to="/">Home</Link></li>
-                <li><Link to="/count">Post</Link></li>
+                <li><Link to="/post/newpost">Post</Link></li>
                 <li><Link to="/about">About</Link></li>
             </ul>
         </nav>
