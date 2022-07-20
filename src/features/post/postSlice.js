@@ -6,15 +6,18 @@ const initialState = {
     posts: [],
     isLoading: false,
     fetchError: null,
-    error: null
 };
 
 export const fetchPosts = createAsyncThunk(
     'posts/fetchPosts',
-    async () => {
-        const response = await axios.get('getPost')
-        // The value we return becomes the `fulfilled` action payload
-        return response.data;
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axios.get('getPost')
+            // The value we return becomes the `fulfilled` action payload
+            return response.data;
+        } catch (err) {
+            return rejectWithValue(err.message)
+        }
     }
 );
 
@@ -26,12 +29,27 @@ export const createPost = createAsyncThunk(
             // The value we return becomes the `fulfilled` action payload
             return response.data;
         } catch (err) {
-            if (!err.response) {
-                throw err
+            if (err.code === 'ERR_NETWORK') {
+                return rejectWithValue(err.message)
             }
-            return rejectWithValue(err.response.data)
+            return rejectWithValue(err.response.data.error)
         }
+    }
+);
 
+export const updatePost = createAsyncThunk(
+    'posts/updatePost',
+    async (post, { rejectWithValue }) => {
+        try {
+            const response = await axios.patch(`updatepost/${post._id}`, post)
+            // The value we return becomes the `fulfilled` action payload
+            return response.data;
+        } catch (err) {
+            if (err.code === 'ERR_NETWORK') {
+                return rejectWithValue(err.message)
+            }
+            return rejectWithValue(err.response.data.error)
+        }
     }
 );
 
@@ -50,10 +68,11 @@ export const postSlice = createSlice({
             .addCase(fetchPosts.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.posts = action.payload.posts;
+                state.fetchError = null;
             })
             .addCase(fetchPosts.rejected, (state, action) => {
                 state.isLoading = false;
-                state.fetchError = action.error;
+                state.fetchError = action.payload;
             })
             .addCase(createPost.pending, (state) => {
                 state.isLoading = true;
@@ -62,10 +81,15 @@ export const postSlice = createSlice({
                 state.isLoading = false;
                 state.posts.push(action.payload.post);
             })
-            .addCase(createPost.rejected, (state, action) => {
-                    console.log(action.error)
-                    state.isLoading = false;
-                    state.error = action.error;
+            .addCase(updatePost.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(updatePost.fulfilled, (state, action) => {
+                const updatePosts = state.posts.map((post) => (
+                    post._id === action.payload.updatePost._id ? action.payload.updatePost : post
+                ))
+                state = { ...state, isLoading: false, posts: updatePosts }
+                return state;
             })
     }
 });

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from '../../api/axios';
-import { createPost } from '../../features/post/postSlice';
+import { createPost, updatePost } from '../../features/post/postSlice';
 import ErrorPage from './ErrorPage';
 
 /**
@@ -16,6 +16,8 @@ const NewPost = () => {
     const [postTitle, setPostTitle] = useState('');
     const [postDescrip, setPostDescrip] = useState('');
     const [fetchError, setFetchError] = useState(null);
+    const [error, setError] = useState(null);
+
     const navigate = useNavigate();
     const { id } = useParams();
     const dispatch = useDispatch();
@@ -27,25 +29,20 @@ const NewPost = () => {
             unwrapResult(await dispatch(createPost(newPost)));
             navigate('/');
         } catch (err) {
-            console.log(err);
+            setError(err);
         }
     }
 
     const handleUpdate = async (e) => {
-        // e.preventDefault();
-        // const updatedPost = { title: postTitle, descrip: postDescrip };
-        // try {
-        //     await axios.put(`/updatepost/${id}`, updatedPost);
-        //     setPostTitle('');
-        //     setPostDescrip('');
-        //     navigate('/');
+        e.preventDefault();
+        const updatedPost = { _id: id, title: postTitle, descrip: postDescrip };
+        try {
+            unwrapResult(await dispatch(updatePost(updatedPost)))
+            navigate('/');
 
-        // } catch (err) {
-        //     console.log(`Error: ${err.message}`);
-        //     if (err.response.status === 400) {
-        //         setFetchError(err.response.data.message);
-        //     }
-        // }
+        } catch (err) {
+            setError(err);
+        }
     }
 
     useEffect(() => {
@@ -63,7 +60,11 @@ const NewPost = () => {
             }
             getDetailPost(id);
         }
-    }, [id])
+    }, [id]);
+
+    useEffect(() => {
+        setError(null)
+    }, [postTitle, postDescrip])
 
     return (
         <div className="NewPost">
@@ -72,12 +73,13 @@ const NewPost = () => {
                     <>
                         <h2>{id === undefined ? 'New Post' : 'Edit Post'}</h2>
                         <form className="newPostForm" onSubmit={id === undefined ? handleSubmit : handleUpdate}>
-                            <label htmlFor="postTitle">Title:</label>
+                            <label htmlFor="postTitle">Title:<span style={{ color: 'red', fontWeight: 'bold' }}>{error}</span></label>
                             <input
                                 id="postTitle"
                                 type="text"
                                 value={postTitle}
                                 onChange={(e) => setPostTitle(e.target.value)}
+                                className={error ? 'text-validate' : null}
                             />
                             <label htmlFor="postDescrip">Post:</label>
                             <textarea
