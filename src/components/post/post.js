@@ -14,7 +14,7 @@ const Post = ({ post }) => {
 
     return (
         <article className="post">
-            <Link to={`/post`}>
+            <Link to={`/post/${post._id}`}>
                 <h2>{post.title}</h2>
             </Link>
             <p className="postDate">{`Created At: ${date.toString().substring(4, 15)} ${date.toLocaleTimeString()}`}</p>
