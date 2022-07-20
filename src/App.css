@@ -334,3 +334,7 @@ body {
 .hover-actions-trigger:hover .hover-actions {
   display: block !important;
 }
+
+.text-validate{
+  border-color: red;
+}

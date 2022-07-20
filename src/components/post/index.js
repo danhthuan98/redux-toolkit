@@ -15,7 +15,7 @@ const PostPage = () => {
     return (
         <div className="Home">
             {data?.isLoading && <p className="statusMsg">Loading posts...</p>}
-            {!data?.isLoading && data?.fetchError && <p className="statusMsg" style={{ color: "red" }}>{data?.fetchError?.message}</p>}
+            {!data?.isLoading && data?.fetchError && <p className="statusMsg" style={{ color: "red" }}>{data?.fetchError}</p>}
             {!data?.isLoading && !data?.fetchError && (
                 data?.posts?.length > 0 ?
                     data?.posts?.map((post) => (
