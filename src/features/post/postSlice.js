@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { current } from '@reduxjs/toolkit'
 import axios from '../../api/axios';
 
 
@@ -48,6 +49,7 @@ export const updatePost = createAsyncThunk(
             if (err.code === 'ERR_NETWORK') {
                 return rejectWithValue(err.message)
             }
+            console.log(err)
             return rejectWithValue(err.response.data.error)
         }
     }
@@ -78,8 +80,9 @@ export const postSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(createPost.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.posts.push(action.payload.post);
+                // state.isLoading = false;
+                // state.posts.push(action.payload.post);
+                return { ...state, isLoading: false, posts: [action.payload.post, ...state.posts] }
             })
             .addCase(updatePost.pending, (state) => {
                 state.isLoading = true;
@@ -90,6 +93,15 @@ export const postSlice = createSlice({
                 ))
                 state = { ...state, isLoading: false, posts: updatePosts }
                 return state;
+            })
+            .addCase(updatePost.rejected, (state, action) => {
+                if (action.payload === 'Post has been no exists') {
+                    const updatedPosts = state.posts.filter((post) => post._id !== action.meta.arg._id)
+                    return { ...state, isLoading: false, posts: updatedPosts }
+                } else {
+                    const currentPosts = state.posts;
+                    return { ...state, isLoading: false, posts: currentPosts }
+                }
             })
     }
 });

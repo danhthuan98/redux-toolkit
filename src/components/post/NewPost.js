@@ -41,7 +41,11 @@ const NewPost = () => {
             navigate('/');
 
         } catch (err) {
-            setError(err);
+            if (err === 'Post has been no exists') {
+                setFetchError(err);
+            } else {
+                setError(err);
+            }
         }
     }
 
